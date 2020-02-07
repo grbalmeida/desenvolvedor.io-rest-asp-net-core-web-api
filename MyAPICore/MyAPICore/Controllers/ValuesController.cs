@@ -19,6 +19,10 @@ namespace MyAPICore.Controllers
 
         // GET api/values/5
         [HttpGet("{id}")]
+        //[HttpGet]
+        //[Route("{id:int}")]
+        //[HttpGet, Route("{id:int}")]
+        //[HttpGet("get-by-id/{id:int}")] api/values/get-by-id/5
         public ActionResult<string> Get(int id)
         {
             return "value";
