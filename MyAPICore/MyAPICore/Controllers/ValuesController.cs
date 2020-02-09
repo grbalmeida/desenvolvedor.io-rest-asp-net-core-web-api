@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MyAPICore.Controllers
 {
+    [ApiConventionType(typeof(DefaultApiConventions))]
     [Route("api/[controller]")]
     public class ValuesController : MainController
     {
@@ -18,7 +17,8 @@ namespace MyAPICore.Controllers
             var values = new string[] { "value1", "value2" };
 
             if (values.Length < 5000)
-                return BadRequest();
+                //return BadRequest();
+                return null;
 
             return Ok(values);
         }
@@ -60,8 +60,9 @@ namespace MyAPICore.Controllers
 
         // POST api/values
         [HttpPost]
-        [ProducesResponseType(typeof(Product), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(typeof(Product), StatusCodes.Status201Created)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Post))]
         public ActionResult Post(Product product)
         {
             if (product.Id == 0) return BadRequest();
@@ -73,6 +74,9 @@ namespace MyAPICore.Controllers
 
         // POST api/values/product/from-query?id=10&name=Name&description=Description
         [HttpPost("product/from-query")]
+        //[ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Post))]
         public ActionResult<Product> Post([FromQuery] int id, [FromQuery] string name, [FromQuery] string description)
         {
             if (id == 0) return BadRequest();
@@ -91,15 +95,16 @@ namespace MyAPICore.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put([FromRoute] int id, [FromBody] string value)
+        [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Put))]
+        public ActionResult Put([FromRoute] int id, [FromForm] Product product)
         {
-        }
+            if (!ModelState.IsValid) return BadRequest();
 
-        // PUT api/values/product/5
-        [HttpPut("product/{id:int}")]
-        public void Put([FromRoute] int id, [FromForm] Product product)
-        {
+            if (id != product.Id) return NotFound();
 
+            //return Ok();
+
+            return NoContent();
         }
 
         // DELETE api/values/5
