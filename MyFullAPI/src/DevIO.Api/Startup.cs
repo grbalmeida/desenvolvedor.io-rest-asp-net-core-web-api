@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using AutoMapper;
+using DevIO.Api.Configuration;
+using DevIO.Data.Context;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,7 +21,16 @@ namespace DevIO.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<MyDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+            services.AddAutoMapper(typeof(Startup));
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.ResolveDependencies();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
