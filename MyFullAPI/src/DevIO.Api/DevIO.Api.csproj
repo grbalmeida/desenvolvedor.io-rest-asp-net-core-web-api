@@ -6,9 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\app\**" />
     <Compile Remove="wwwroot\images\**" />
+    <Content Remove="wwwroot\app\**" />
     <Content Remove="wwwroot\images\**" />
+    <EmbeddedResource Remove="wwwroot\app\**" />
     <EmbeddedResource Remove="wwwroot\images\**" />
+    <None Remove="wwwroot\app\**" />
     <None Remove="wwwroot\images\**" />
   </ItemGroup>
 
@@ -21,6 +25,10 @@
   <ItemGroup>
     <ProjectReference Include="..\DevIO.Business\DevIO.Business.csproj" />
     <ProjectReference Include="..\DevIO.Data\DevIO.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>
