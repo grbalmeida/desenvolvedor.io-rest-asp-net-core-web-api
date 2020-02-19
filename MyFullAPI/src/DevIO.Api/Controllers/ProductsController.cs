@@ -63,6 +63,42 @@ namespace DevIO.Api.Controllers
             return CustomResponse(productViewModel);
         }
 
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Update(Guid id, ProductViewModel productViewModel)
+        {
+            if (id != productViewModel.Id)
+            {
+                NotifyError("The id given is not the same as the one entered in the query");
+                return CustomResponse();
+            }
+
+            var productUpdate = await GetProduct(id);
+            productViewModel.Image = productUpdate.Image;
+
+            if (!ModelState.IsValid) return CustomResponse(ModelState);
+
+            if (productViewModel.UploadImage != null)
+            {
+                var imageName = Guid.NewGuid() + "_" + productViewModel.Image;
+
+                if (!UploadFile(productViewModel.UploadImage, imageName))
+                {
+                    return CustomResponse(ModelState);
+                }
+
+                productUpdate.Image = imageName;
+            }
+
+            productUpdate.Name = productViewModel.Name;
+            productUpdate.Description = productViewModel.Description;
+            productUpdate.Price = productViewModel.Price;
+            productViewModel.Active = productViewModel.Active;
+
+            await _productService.Update(_mapper.Map<Product>(productUpdate));
+
+            return CustomResponse(productViewModel);
+        }
+
         [HttpPost("add-alternative")]
         public async Task<ActionResult<ProductViewModel>> AddAlternative(ProductImageViewModel productImageViewModel)
         {
