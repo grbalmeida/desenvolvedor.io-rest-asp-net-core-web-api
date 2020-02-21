@@ -1,9 +1,12 @@
 ﻿using DevIO.Api.Data;
 using DevIO.Api.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace DevIO.Api.Configuration
 {
@@ -19,6 +22,35 @@ namespace DevIO.Api.Configuration
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddErrorDescriber<IdentityMessagesPortuguese>()
                 .AddDefaultTokenProviders(); // Email confirmation, reset password
+
+            // JWT
+
+            var appSettingsSection = configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+            // When injecting the AppSettings class into any class, it already comes with
+            // the information from the AppSettings section of the appsettings.json file
+
+            var appSettings = appSettingsSection.Get<AppSettings>();
+            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+
+            services.AddAuthentication(configureOptions =>
+            {
+                configureOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                configureOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(configureOptions =>
+            {
+                configureOptions.RequireHttpsMetadata = false; // Should be disabled only in development environments
+                configureOptions.SaveToken = true; // Defines whether the token should be stored, after a successful authorization attempt
+                configureOptions.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true, // Validate that whoever is issuing the token is the same when you receive the token
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidAudience = appSettings.ValidIn,
+                    ValidIssuer = appSettings.Issuer
+                };
+            });
 
             return services;
         }
