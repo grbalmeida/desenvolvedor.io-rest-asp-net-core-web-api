@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DevIO.Api.Extensions;
 using DevIO.App.ViewModels;
 using DevIO.Business.Interfaces;
 using DevIO.Business.Models;
@@ -48,6 +49,7 @@ namespace DevIO.Api.Controllers
             return supplier;
         }
 
+        [ClaimsAuthorize("Supplier", "Add")]
         [HttpPost]
         public async Task<ActionResult<SupplierViewModel>> Add(SupplierViewModel supplierViewModel)
         {
@@ -58,6 +60,7 @@ namespace DevIO.Api.Controllers
             return CustomResponse(supplierViewModel);
         }
 
+        [ClaimsAuthorize("Supplier", "Update")]
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<SupplierViewModel>> Update(Guid id, SupplierViewModel supplierViewModel)
         {
@@ -74,6 +77,7 @@ namespace DevIO.Api.Controllers
             return CustomResponse(supplierViewModel);
         }
 
+        [ClaimsAuthorize("Supplier", "Delete")]
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult<SupplierViewModel>> Delete(Guid id)
         {
@@ -92,6 +96,7 @@ namespace DevIO.Api.Controllers
             return _mapper.Map<AddressViewModel>(await _addressRepository.GetById(id));
         }
 
+        [ClaimsAuthorize("Supplier", "Update")]
         [HttpPut("update-address/{id:guid}")]
         public async Task<IActionResult> UpdateAddress(Guid id, AddressViewModel addressViewModel)
         {
@@ -104,12 +109,12 @@ namespace DevIO.Api.Controllers
             return CustomResponse(addressViewModel);
         }
 
-        public async Task<SupplierViewModel> GetAddressAndProductsFromSupplier(Guid id)
+        private async Task<SupplierViewModel> GetAddressAndProductsFromSupplier(Guid id)
         {
             return _mapper.Map<SupplierViewModel>(await _supplierRepository.GetAddressAndProductsFromSupplier(id));
         }
 
-        public async Task<SupplierViewModel> GetSupplierAddress(Guid id)
+        private async Task<SupplierViewModel> GetSupplierAddress(Guid id)
         {
             return _mapper.Map<SupplierViewModel>(await _supplierRepository.GetSupplierAddress(id));
         }
