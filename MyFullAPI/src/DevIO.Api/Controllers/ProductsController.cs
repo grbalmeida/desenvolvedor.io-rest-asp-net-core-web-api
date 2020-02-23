@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DevIO.Api.Extensions;
 using DevIO.App.ViewModels;
 using DevIO.Business.Interfaces;
 using DevIO.Business.Models;
@@ -46,6 +47,7 @@ namespace DevIO.Api.Controllers
             return productViewModel;
         }
 
+        [ClaimsAuthorize("Product", "Add")]
         [HttpPost]
         public async Task<ActionResult<ProductViewModel>> Add(ProductViewModel productViewModel)
         {
@@ -65,6 +67,7 @@ namespace DevIO.Api.Controllers
             return CustomResponse(productViewModel);
         }
 
+        [ClaimsAuthorize("Product", "Update")]
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update(Guid id, ProductViewModel productViewModel)
         {
@@ -101,6 +104,7 @@ namespace DevIO.Api.Controllers
             return CustomResponse(productViewModel);
         }
 
+        [ClaimsAuthorize("Product", "Add")]
         [HttpPost("add-alternative")]
         public async Task<ActionResult<ProductViewModel>> AddAlternative(ProductImageViewModel productImageViewModel)
         {
@@ -128,6 +132,7 @@ namespace DevIO.Api.Controllers
             return Ok(file);
         }
 
+        [ClaimsAuthorize("Product", "Delete")]
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult<ProductViewModel>> Delete(Guid id)
         {
