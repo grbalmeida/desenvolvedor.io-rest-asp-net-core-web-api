@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Net.Http.Headers;
 
 namespace DevIO.Api.Configuration
 {
@@ -10,6 +9,19 @@ namespace DevIO.Api.Configuration
         public static IServiceCollection WebApiConfig(this IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddApiVersioning(options =>
+            {
+                options.AssumeDefaultVersionWhenUnspecified = true; // When you do not have a specified version (V1, V2) you will assume the default version
+                options.DefaultApiVersion = new ApiVersion(1, 0); // major 1 - minor 0 (2.0)
+                options.ReportApiVersions = true; // Inform in the response header if the API is obsolete
+            });
+
+            services.AddVersionedApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV"; // version - major - minor - patch
+                options.SubstituteApiVersionInUrl = true;
+            });
 
             services.Configure<ApiBehaviorOptions>(options =>
             {
