@@ -1,6 +1,7 @@
 ﻿using DevIO.Api.Extensions;
 using DevIO.Api.ViewModels;
 using DevIO.Business.Interfaces;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 namespace DevIO.Api.Controllers
 {
     [Route("api/account")]
+    //[DisableCors]
     public class AuthController : MainController
     {
         private readonly SignInManager<IdentityUser> _signInManager;
@@ -32,6 +34,7 @@ namespace DevIO.Api.Controllers
             _appSettings = appSettings.Value;
         }
 
+        //[EnableCors("Development")]
         [HttpPost("new-account")]
         public async Task<ActionResult> RegisterUser(RegisterUserViewModel registerUser)
         {
