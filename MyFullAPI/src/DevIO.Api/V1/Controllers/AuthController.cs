@@ -4,6 +4,7 @@ using DevIO.Api.ViewModels;
 using DevIO.Business.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -23,16 +24,19 @@ namespace DevIO.Api.V1.Controllers
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly AppSettings _appSettings;
+        private readonly ILogger _logger;
 
         public AuthController(INotifier notifier,
                               SignInManager<IdentityUser> signInManager,
                               UserManager<IdentityUser> userManager,
                               IOptions<AppSettings> appSettings,
-                              IUser appUser): base(notifier, appUser)
+                              IUser appUser,
+                              ILogger<AuthController> logger): base(notifier, appUser)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _appSettings = appSettings.Value;
+            _logger = logger;
         }
 
         //[EnableCors("Development")]
@@ -78,15 +82,18 @@ namespace DevIO.Api.V1.Controllers
 
             if (result.Succeeded)
             {
+                _logger.LogInformation($"User {loginUser.Email} successfully logged in");
                 return CustomResponse(await GenerateJwt(loginUser.Email));
             }
 
             if (result.IsLockedOut)
             {
+                _logger.LogError($"User {loginUser.Email} temporarily blocked by invalid attempts");
                 NotifyError("User temporarily blocked by invalid attempts");
                 return CustomResponse(loginUser);
             }
 
+            _logger.LogWarning("Incorrect username or password");
             NotifyError("Incorrect username or password");
             return CustomResponse(loginUser);
         }

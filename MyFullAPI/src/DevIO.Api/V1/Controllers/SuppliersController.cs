@@ -6,6 +6,7 @@ using DevIO.Business.Interfaces;
 using DevIO.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -21,18 +22,21 @@ namespace DevIO.Api.V1.Controllers
         private readonly ISupplierService _supplierService;
         private readonly IAddressRepository _addressRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger _logger;
 
         public SuppliersController(ISupplierRepository supplierRepository,
                                    ISupplierService supplierService,
                                    IAddressRepository addressRepository,
                                    IMapper mapper,
                                    INotifier notifier,
-                                   IUser user) : base(notifier, user)
+                                   IUser user,
+                                   ILogger<SuppliersController> logger) : base(notifier, user)
         {
             _supplierRepository = supplierRepository;
             _supplierService = supplierService;
             _addressRepository = addressRepository;
             _mapper = mapper;
+            _logger = logger;
         }
 
         [AllowAnonymous]
@@ -47,7 +51,11 @@ namespace DevIO.Api.V1.Controllers
         {
             var supplier = await GetAddressAndProductsFromSupplier(id);
 
-            if (supplier == null) return NotFound();
+            if (supplier == null)
+            {
+                _logger.LogWarning("Supplier not found");
+                return NotFound();
+            }
 
             return supplier;
         }
@@ -69,6 +77,7 @@ namespace DevIO.Api.V1.Controllers
         {
             if (id != supplierViewModel.Id)
             {
+                _logger.LogWarning("The id given is not the same as the one entered in the query");
                 NotifyError("The id given is not the same as the one entered in the query");
                 return CustomResponse(supplierViewModel);
             }
@@ -86,7 +95,11 @@ namespace DevIO.Api.V1.Controllers
         {
             var supplierViewModel = await GetSupplierAddress(id);
 
-            if (supplierViewModel == null) return NotFound();
+            if (supplierViewModel == null)
+            {
+                _logger.LogWarning("Supplier not found");
+                return NotFound();
+            }
 
             await _supplierService.Remove(id);
 

@@ -7,6 +7,7 @@ using DevIO.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,16 +23,19 @@ namespace DevIO.Api.V1.Controllers
         private readonly IProductRepository _productRepository;
         private readonly IProductService _productService;
         private readonly IMapper _mapper;
+        private readonly ILogger _logger;
 
         public ProductsController(IProductRepository productRepository,
                                   IProductService productService,
                                   IMapper mapper,
                                   INotifier notifier,
-                                  IUser user) : base(notifier, user)
+                                  IUser user,
+                                  ILogger <ProductsController> logger) : base(notifier, user)
         {
             _productRepository = productRepository;
             _productService = productService;
             _mapper = mapper;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -45,7 +49,11 @@ namespace DevIO.Api.V1.Controllers
         {
             var productViewModel = await GetProduct(id);
 
-            if (productViewModel == null) return NotFound();
+            if (productViewModel == null)
+            {
+                _logger.LogWarning("Product not found");
+                return NotFound();
+            }
 
             return productViewModel;
         }
@@ -76,6 +84,7 @@ namespace DevIO.Api.V1.Controllers
         {
             if (id != productViewModel.Id)
             {
+                _logger.LogWarning("The id given is not the same as the one entered in the query");
                 NotifyError("The id given is not the same as the one entered in the query");
                 return CustomResponse();
             }
@@ -141,7 +150,11 @@ namespace DevIO.Api.V1.Controllers
         {
             var product = await GetProduct(id);
 
-            if (product == null) return NotFound();
+            if (product == null)
+            {
+                _logger.LogWarning("Product not found");
+                return NotFound();
+            }
 
             await _productService.Remove(id);
 
@@ -152,6 +165,7 @@ namespace DevIO.Api.V1.Controllers
         {
             if (string.IsNullOrEmpty(file))
             {
+                _logger.LogWarning("Please provide an image for this product!");
                 NotifyError("Please provide an image for this product!");
                 return false;
             }
@@ -162,6 +176,7 @@ namespace DevIO.Api.V1.Controllers
 
             if (System.IO.File.Exists(filePath))
             {
+                _logger.LogWarning("There is already a file with that name!");
                 NotifyError("There is already a file with that name!");
                 return false;
             }
@@ -175,6 +190,7 @@ namespace DevIO.Api.V1.Controllers
         {
             if (file == null || file.Length == 0)
             {
+                _logger.LogWarning("Please provide an image for this product!");
                 NotifyError("Please provide an image for this product!");
                 return false;
             }
@@ -183,6 +199,7 @@ namespace DevIO.Api.V1.Controllers
 
             if (System.IO.File.Exists(path))
             {
+                _logger.LogWarning("There is already a file with that name!");
                 NotifyError("There is already a file with that name!");
                 return false;
             }
