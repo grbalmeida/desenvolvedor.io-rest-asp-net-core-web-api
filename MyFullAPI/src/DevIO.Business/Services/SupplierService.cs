@@ -31,6 +31,13 @@ namespace DevIO.Business.Services
                 Notify("There is already a supplier with this document entered.");
                 return false;
             }
+            
+            var address = await _addressRepository.GetAddressBySupplier(id);
+
+            if (address != null)
+            {
+                await _addressRepository.Remove(address.Id);
+            }
 
             await _supplierRepository.Add(supplier);
 
